@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>精致雪花效果</title>
+  <style>
+    #bd {
+      width: 470px;
+      margin: 0 auto;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .snow-container {
+      /* 更深的冰蓝色背景 */
+      background-color: #d0e9f5;
+      /* 微妙的渐变，增强层次感 */
+      background-image: linear-gradient(
+              135deg,
+              rgba(255, 255, 255, 0.4) 0%,
+              rgba(208, 233, 245, 0.8) 50%,
+              rgba(176, 216, 235, 0.9) 100%
+      );
+      /* 卡片基础样式 */
+
+      width: 470px;
+      height: 440px;
+      box-shadow: 0 6px 18px rgba(80, 160, 210, 0.2);
+      position: relative;
+      overflow: hidden;
+    }
+
+    /* 雪花容器 - 使用网格布局 */
+    .snow-layer {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(1px, 1fr));
+      grid-auto-rows: 1px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    .snowflake {
+      grid-column: var(--col);
+      grid-row: var(--row);
+      justify-self: center;
+      color: white;
+      font-size: var(--size);
+      user-select: none;
+      pointer-events: none;
+      animation: fall linear infinite;
+      animation-duration: var(--duration);
+      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
+      opacity: var(--opacity);
+      transform: translateY(-100%);
+    }
+
+    @keyframes fall {
+      to {
+        transform: translateY(600px);
+      }
+    }
+
+    @font-face {
+      font-family: 'CustomFont';
+      src: url('zt.ttf') format('truetype');
+    }
+
+    body {
+      font-family: 'CustomFont';
+    }
+
+    #mainSentence img {
+      font-size: 30px;
+    }
+
+
+    /* 内容区域 - 确保显示在雪花上方 */
+    .content {
+      position: relative;
+      z-index: 2;
+      padding-left: 20px;
+      padding-right: 20px;
+      height: 100%;
+    }
+    .inner>div{
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+<div id="bd">
+  <!-- 雪花层 -->
+  <div class="snow-layer" id="snowContainer"></div>
+
+  <!-- 内容层 -->
+  <div class="snow-container">
+      <div style="">
+        <div style="border: 3px solid white;rotate: -3deg;width: 60%;height: 200px;margin: 100px auto 0">
+
+        </div>
+        <div style="position: relative;display: flex;justify-content: right;bottom: 60px;right: 40px">
+          <img src="IMG_SEGMENT_20250405_120552.png" alt="" width="100" height="150">
+        </div>
+        <div style="width: 380px;margin: 0 auto;position: relative;display: flex;justify-content: space-between;bottom: 60px;">
+          <div class="inner" style="display: flex;flex-direction: row">
+            <div>图片</div>
+            <div>图片</div>
+            <div>图片</div>
+          </div>
+          <div class="inner" style="display: flex;flex-direction: row">
+            <div>
+              左
+            </div>
+            <div>
+              右
+            </div>
+          </div>
+        </div>
+      </div>
+
+  </div>
+
+
+</div>
+
+<script>
+  document.addEventListener('DOMContentLoaded', function() {
+    const container = document.getElementById('snowContainer');
+    const snowflakes = ['❄', '❅', '❆', '✻', '✼'];
+
+    // 创建15片雪花
+    for (let i = 0; i < 15; i++) {
+      createSnowflake();
+    }
+
+    function createSnowflake() {
+      const snowflake = document.createElement('div');
+      snowflake.className = 'snowflake';
+
+      // 随机选择雪花字符
+      snowflake.textContent = snowflakes[Math.floor(Math.random() * snowflakes.length)];
+
+      // 设置CSS变量
+      const size = Math.random() * 0.8 + 0.7;
+      const opacity = Math.random() * 0.3 + 0.7;
+      const duration = Math.random() * 12 + 8;
+      const col = Math.floor(Math.random() * 450) + 1; // 匹配容器宽度
+      const row = 1; // 从顶部开始
+
+      snowflake.style.setProperty('--size', `${size}em`);
+      snowflake.style.setProperty('--opacity', opacity);
+      snowflake.style.setProperty('--duration', `${duration}s`);
+      snowflake.style.setProperty('--col', col);
+      snowflake.style.setProperty('--row', row);
+
+      // 添加摆动效果
+      const swayAmplitude = Math.random() * 30 + 10;
+      const swayFrequency = Math.random() * 0.01 + 0.005;
+
+      let startTime = Date.now();
+      function sway() {
+        const time = (Date.now() - startTime) / 1000;
+        const swayX = Math.sin(time * swayFrequency * 2 * Math.PI) * swayAmplitude;
+        snowflake.style.transform = `translate(${swayX}px, -100%)`;
+        requestAnimationFrame(sway);
+      }
+      sway();
+
+      container.appendChild(snowflake);
+
+      // 雪花落地后重新开始
+      snowflake.addEventListener('animationiteration', () => {
+        snowflake.style.setProperty('--col', Math.floor(Math.random() * 450) + 1);
+        snowflake.style.transform = 'translateY(-100%)';
+      });
+    }
+  });
+</script>
+</body>
+</html>
