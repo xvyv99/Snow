@@ -1,83 +1,32 @@
 <script lang='ts'>
-    let selected: number = 1;  // 初始时没有选中任何 div
+    let selected: string = 'landscape';  
 
-    function selectDiv(index: number) {
-        selected = index;  // 点击时更新选中项
+    function selectDiv(index: string) {
+        selected = index; 
     }
 
-  import { onMount } from 'svelte';
-  
-  let snowContainer: HTMLElement;
-  const snowflakeSymbols = ['❄', '❅', '❆', '✻', '✼'];
-  let snowflakes = [];
-  
-  // 创建雪花对象
-  function createSnowflake() {
-    return {
-      id: Math.random().toString(36).substr(2, 9),
-      symbol: snowflakeSymbols[Math.floor(Math.random() * snowflakeSymbols.length)],
-      size: Math.random() * 0.8 + 0.7,
-      opacity: Math.random() * 0.3 + 0.7,
-      duration: Math.random() * 12 + 8,
-      col: Math.floor(Math.random() * 450) + 1,
-      row: 1,
-      swayAmplitude: Math.random() * 30 + 10,
-      swayFrequency: Math.random() * 0.01 + 0.005,
-      startPos: Math.random() * 100
-    };
-  }
-  
-  // 使用onMount确保在DOM渲染后执行
-  onMount(() => {
-    // 创建15片雪花
-    for (let i = 0; i < 15; i++) {
-      snowflakes.push(createSnowflake());
+    import { goto } from '$app/navigation';
+
+    function navigate() {
+      const selectedParam = new URLSearchParams({ selected })
+      goto(`/custom?${selectedParam}`);
     }
-    
-    // 为每个雪花添加摆动动画
-    snowflakes.forEach(flake => {
-      // 这里我们模拟原始代码中的requestAnimationFrame逻辑
-      const element = document.getElementById(`snowflake-${flake.id}`);
-      if (element) {
-        let startTime = Date.now();
-        
-        function sway() {
-          const time = (Date.now() - startTime) / 1000;
-          const swayX = Math.sin(time * flake.swayFrequency * 2 * Math.PI) * flake.swayAmplitude;
-          element.style.transform = `translateX(${swayX}px)`;
-          requestAnimationFrame(sway);
-        }
-        
-        sway();
-      }
-    });
-    
-    // 监听动画完成事件，重置雪花位置
-    const elements = document.querySelectorAll('.snowflake');
-    elements.forEach(elem => {
-      elem.addEventListener('animationiteration', () => {
-        const id = elem.getAttribute('data-id');
-        const flake = snowflakes.find(f => f.id === id);
-        if (flake) {
-          flake.col = Math.floor(Math.random() * 450) + 1;
-          elem.style.gridColumn = flake.col.toString();
-        }
-      });
-    });
-  });
+
+    import ContainedSnowfall from '$lib/snowflake.svelte';
 
 </script>
 
 <style>
-    #bd {
-      width: 440px;
 
-      margin: 0 auto;
+    .bd {
+      display: grid;
+      grid-template-rows: 7fr 2fr 1fr; 
+      width: 100%; height: 100dvh;
       position: relative;
       overflow: hidden;
     }
 
-    .snow-container {
+  .snow-container {
       /* 更深的冰蓝色背景 */
       background-color: #d0e9f5;
       /* 微妙的渐变，增强层次感 */
@@ -89,47 +38,12 @@
       );
       /* 卡片基础样式 */
       padding-top: 20px;
-      width: 440px;
-      height: 500px;
+      width: 100%;
+      height: 100%;
       box-shadow: 0 6px 18px rgba(80, 160, 210, 0.2);
       position: relative;
       overflow: hidden;
-    }
-
-    /* 雪花容器 - 使用网格布局 */
-    .snow-layer {
-      position: absolute;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(1px, 1fr));
-      grid-auto-rows: 1px;
-      pointer-events: none;
-      z-index: 1;
-    }
-
-    .snowflake {
-      grid-column: var(--col);
-      grid-row: var(--row);
-      justify-self: center;
-      color: white;
-      font-size: var(--size);
-      user-select: none;
-      pointer-events: none;
-      animation: fall linear infinite;
-      animation-duration: var(--duration);
-      text-shadow: 0 0 5px rgba(255, 255, 255, 0.7);
-      opacity: var(--opacity);
-      transform: translateY(-100%);
-    }
-
-    @keyframes fall {
-      to {
-        transform: translateY(600px);
       }
-    }
 
     @font-face {
       font-family: 'CustomFont';
@@ -140,10 +54,6 @@
 
     .art_text {
       font-family: 'CustomFont';
-    }
-
-    #mainSentence img {
-      font-size: 30px;
     }
 
     #mainSentence {
@@ -172,6 +82,7 @@
        cursor: pointer;
        text-align: center;
        user-select: none;
+       z-index: 1;
      }
 
     .hv.active {
@@ -197,60 +108,42 @@
   <title>冰趣卡</title>
 </svelte:head>
 
-<div id="bd">
-  <!-- 雪花层 -->
-<div class="snow-layer" bind:this={snowContainer}>
-  {#each snowflakes as flake (flake.id)}
-    <div 
-      id="snowflake-{flake.id}"
-      data-id={flake.id}
-      class="snowflake"
-      style="
-        --size: {flake.size}em;
-        --opacity: {flake.opacity};
-        --duration: {flake.duration}s;
-        --col: {flake.col};
-        --row: {flake.row};
-        left: {flake.startPos}%;
-      "
-    >
-      {flake.symbol}
-    </div>
-  {/each}
-</div>
-
-  <!-- 内容层 -->
+<div class="bd">
   <div class="snow-container">
+    <ContainedSnowfall snowflakeCount={20} minSize={10} maxSize={20}>
     <div class="content">
       <h1 class='art_text' style="width: 100%;text-align: center">冰趣卡</h1>
       <div id="mainSentence" style="display: flex;flex-direction: column;justify-content: center;align-items: center">
         <div class='art_text'>点击开启</div>
         <div class='art_text'>您的专属定制</div>
       </div>
-      <div style="height: 200px;margin-top: 5%;display: flex;flex-direction: row;align-items: flex-end">
-        <div style="border: 4px solid white;width: 450px;height: 200px;display: flex;align-items: flex-end">
+      <div style="height: 200px;margin-top: 15%;display: flex;flex-direction: row;align-items: flex-end">
+        <div style="border: 4px solid white;width: 450px;height: 200px;display: flex;align-items: flex-end; border-radius: 10px;" class="card">
           <div id="dt" style="width: 300px;display: flex;flex-direction: row;justify-content: space-around;align-items: flex-end">
-            <div class="hv" class:active={selected === 0} class:inactive={selected != 0} on:click={() => selectDiv(0)}>
-              <img src="651741447883_.pic_hd.jpg" alt="" width="60" height="100">
+            <button class="hv" class:active={selected === 'culture'} class:inactive={selected != 'culture'} on:click={() => selectDiv('culture')} style="border: none; background: none;">
+              <img src="/culture.jpg" alt="" width="60" height="100">
               <p class='art_text' style="margin: 0;text-align: center">文化主题</p>
-            </div>
-            <div class="hv" class:active={selected === 1} class:inactive={selected != 1} on:click={() => selectDiv(1)}>
-              <img src="661741447885_.pic_hd.jpg" alt="" width="60" height="100">
+            </button>
+            <button class="hv" class:active={selected === 'landscape'} class:inactive={selected != 'landscape'} on:click={() => selectDiv('landscape')} style="border: none; background: none;">
+              <img src="/landscape.jpg" alt="" width="60" height="100">
               <p class='art_text' style="margin: 0;text-align: center">风景主题</p>
-            </div>
-            <div class="hv" class:active={selected === 2} class:inactive={selected != 2} on:click={() => selectDiv(2)}>
-              <img src="671741447887_.pic_hd.jpg" alt="" width="60" height="100">
+            </button>
+            <button class="hv" class:active={selected === 'folk'} class:inactive={selected != 'folk'} on:click={() => selectDiv('folk')} style="border: none; background: none;">
+              <img src="/folk.jpg" alt="" width="60" height="100">
               <p class='art_text' style="margin: 0;text-align: center">名俗主题</p>
-            </div>
+            </button>
           </div>
         </div>
-        <div><img src="IMG_SEGMENT_20250405_120552.png" alt="" width="150" height="200" style="position: relative;right: 30px"></div>
+        <div><img src="/snowman.png" alt="" width="150" height="200" style="position: relative;right: 50px; bottom: 25px"></div>
       </div>
     </div>
+  </ContainedSnowfall>
   </div>
-  <div style="margin-top: 20px">
+
+<div>
+  <div style="margin-top: 15%">
     <div style="display: flex;flex-direction: row;justify-content: space-around;">
-      <div>定制流程</div>
+      <div class='art_text'>定制流程</div>
 
     </div>
   </div>
@@ -264,7 +157,7 @@
             <circle cx="12" cy="14" r="2" fill="#1890ff"/>
           </svg>
         </div>
-        <div>
+        <div class='art_text'>
           选定模板
         </div>
       </div>
@@ -276,7 +169,7 @@
             <circle cx="12" cy="12" r="3" stroke="#52c41a" stroke-width="2"/>
           </svg>
         </div>
-        <div>
+        <div class='art_text'>
           个性化定制
         </div>
       </div>
@@ -289,7 +182,7 @@
             <path d="M9 9H12" stroke="#faad14" stroke-width="2" stroke-linecap="round"/>
           </svg>
         </div>
-        <div>
+        <div class='art_text'>
           提交订单
         </div>
       </div>
@@ -303,15 +196,16 @@
             <path d="M10 8H14" stroke="#722ed1" stroke-width="2"/>
           </svg>
         </div>
-        <div>
+        <div class='art_text'>
           发货收货
         </div>
       </div>
     </div>
   </div>
+</div>
 
   <div style="display: flex;justify-content: center;margin-top: 10px">
-    <button style="font-family: 'CustomFont';color: white;font-size: larger;border:#ff1f1f;background-color: #ff2121;border-radius: 20px;width: 80%;height: 30px">
+    <button on:click={navigate} style="margin-top: 20px; font-family: 'CustomFont';color: white;font-size: larger;border:#ff1f1f;background-color: #ff2121;border-radius: 20px;width: 80%;height: 50px">
      点击定制
     </button>
   </div>
