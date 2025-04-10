@@ -22,9 +22,6 @@
 							paletteColor = color
 						}}"
 						style:background={color}>
-			<span class="visually-hidden">
-				Select the color {color}
-			</span>
 		</button>
 		{/each}
 	</div>
@@ -35,9 +32,6 @@
 						paletteColor = background
 					}}
 					style:background>
-		<span class="visually-hidden">
-			Select the background color to clear the canvas
-		</span>
 	</button>
 	
 	<svg style:color={paletteColor} viewBox="-50 -50 100 100">
